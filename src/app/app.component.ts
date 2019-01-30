@@ -2,25 +2,19 @@ import { Component, OnInit, ViewChild, ElementRef  } from '@angular/core';
 import {Hotkey, HotkeysService} from 'angular2-hotkeys';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
-class Stat {
-  name: string;
-  value: number;
-
-  constructor(name: string, value: number) {
-    this.name = name;
-    this.value = value;
-  }
-
-  setValue (value: number) {
-    this.value = value;
-  }
-}
-
 class Actor {
   name: string;
+  roll: number;
+  hp: number;
+  size: number;
+  entente: string;
 
-  constructor(name: string) {
+  constructor(name: string, roll: number, hp: number, size: number, entente: string) {
     this.name = name;
+    this.roll = roll;
+    this.hp = hp;
+    this.size = size;
+    this.entente = entente;
   }
 }
 
@@ -48,7 +42,7 @@ export class AppComponent implements OnInit {
     }));
     this._hotkeysService.add(new Hotkey(['shift+up', 'space'], (event: KeyboardEvent): boolean => {
       console.log('new init');
-      this.addActor(this.modalTemplate);
+      this.addActorModal(this.modalTemplate);
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['shift+down', 'd'], (event: KeyboardEvent): boolean => {
@@ -57,18 +51,42 @@ export class AppComponent implements OnInit {
     }));
   }
 
-  @ViewChild('content') modalTemplate: ElementRef;
+  @ViewChild('newInit') modalTemplate: ElementRef;
   public actorArray;
-  public friendlyArray;
-  public enemyArray;
+  // public actorEntenteArray;
   public trashBin;
 
-  addActor(content): void {
+  buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string): void {
+    this.actorArray.push(new Actor(
+      name,
+      this.getRoll(rollOrMod),
+      +hp,
+      +size,
+      entente
+    ));
+    this.actorArray.sort(this.sortByInit);
+  }
+
+  addActorModal(content): void {
     this.modalService.open(content, { centered: true });
   }
 
+  getRoll(rollOrMod: string): number {
+    if (rollOrMod === '') {
+      return this.d20();
+    } else if (rollOrMod.indexOf('+') !== -1 || rollOrMod.indexOf('-') !== -1) {
+      return this.d20plus(+rollOrMod.substr(1, rollOrMod.length));
+    } else {
+      return +rollOrMod;
+    }
+  }
+
+  sortByInit(actorA, actorB) {
+    return actorB.roll - actorA.roll;
+  }
+
   d20plus(modifier: number): number {
-    return this.getRngInteger(1, 20) + modifier;
+    return this.d20() + modifier;
   }
 
   d20(): number {
