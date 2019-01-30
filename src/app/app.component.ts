@@ -3,11 +3,12 @@ import {Hotkey, HotkeysService} from 'angular2-hotkeys';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 class Actor {
-  name: string;
-  roll: number;
-  hp: number;
-  size: number;
-  entente: string;
+  public id: number;
+  public name: string;
+  public roll: number;
+  public hp: number;
+  public size: number;
+  public entente: string;
 
   constructor(name: string, roll: number, hp: number, size: number, entente: string) {
     this.name = name;
@@ -15,6 +16,8 @@ class Actor {
     this.hp = hp;
     this.size = size;
     this.entente = entente;
+
+    this.id = new Date().getTime();
   }
 }
 
@@ -53,21 +56,36 @@ export class AppComponent implements OnInit {
 
   @ViewChild('newInit') modalTemplate: ElementRef;
   private colorScheme = [
-    'FF6542', '564154', '88498F', '779FA1', 'E0CBA8'
+    'FF6542', '88498F', '4281A4', '62B6CB', '779FA1', 'E0CBA8'
   ];
   public actorArray;
+  public actorMap;
   // public actorEntenteArray;
-  public trashBin;
 
-  buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string): void {
-    this.actorArray.push(new Actor(
-      name,
-      this.getRoll(rollOrMod),
-      hp === '' ? 0 : +hp,
-      size === '' ? 1 : +size,
-      entente
-    ));
+  buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string, id: string): void {
+    console.log(this.actorMap);
+    let a;
+    if (id === '') {
+      a = new Actor(
+        name,
+        this.getRoll(rollOrMod),
+        hp === '' ? 0 : +hp,
+        size === '' ? 1 : +size,
+        entente
+      );
+    } else {
+      a = this.actorMap.get(id);
+      a.name = name;
+      a.roll = this.getRoll(rollOrMod);
+      a.hp = hp;
+      a.size = size;
+      a.entente = entente;
+    }
+
+    this.actorMap.set(a.id, a);
+    this.actorArray.push(a);
     this.actorArray.sort(this.sortByInit);
+    this.save();
   }
 
   addActorModal(content): void {
@@ -104,9 +122,15 @@ export class AppComponent implements OnInit {
     return Math.floor(Math.random() * (max - min + 1) ) + min;
   }
 
-  ngOnInit(): void {
-    this.actorArray = [];
-    this.trashBin = [];
+  removeInit(id: number) {
+    for (const actor of this.actorArray) {
+      if (id === actor.id) {
+        this.actorArray = this.actorArray.filter(function(ele) {
+          return ele.id !== id;
+        });
+      }
+    }
+    this.save();
   }
 
   getColor(i) {
@@ -118,6 +142,28 @@ export class AppComponent implements OnInit {
       return {
         'background-color': '#' + this.colorScheme[i]
       };
+    }
+  }
+
+  save() {
+    const data = JSON.stringify({
+      'actorArray' : JSON.stringify(this.actorArray)
+    });
+    console.log('data' + data);
+    localStorage.setItem('InnKeepersBrew', data);
+  }
+
+  ngOnInit(): void {
+    this.actorMap = new Map();
+    this.actorArray = [];
+    const storage = JSON.parse(localStorage.getItem('InnKeepersBrew'));
+    if (storage !== '' && storage) {
+      this.actorArray = <[]> JSON.parse(storage.actorArray);
+      if (this.actorArray) {
+        for (const actor of this.actorArray) {
+          this.actorMap.set(actor.id, actor);
+        }
+      }
     }
   }
 }
