@@ -36,10 +36,12 @@ export class AppComponent implements OnInit {
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['shift+right', 'n'], (event: KeyboardEvent): boolean => {
+      this.next();
       console.log('next init');
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['shift+left', 'p'], (event: KeyboardEvent): boolean => {
+      this.previous();
       console.log('previous init');
       return false;
     }));
@@ -63,7 +65,6 @@ export class AppComponent implements OnInit {
   // public actorEntenteArray;
 
   buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string, id: string): void {
-    console.log(this.actorMap);
     let a;
     if (id === '') {
       a = new Actor(
@@ -120,6 +121,16 @@ export class AppComponent implements OnInit {
 
   getRngInteger(min, max): number {
     return Math.floor(Math.random() * (max - min + 1) ) + min;
+  }
+
+  previous(): void {
+    const a = this.actorArray.pop();
+    this.actorArray.unshift(a);
+  }
+
+  next(): void {
+    const a = this.actorArray.shift();
+    this.actorArray.push(a);
   }
 
   removeInit(id: number) {

@@ -34,7 +34,7 @@
     </div>
   </form>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="buildActor(actorName.value, roll.value, hp.value, multiples.value, entente.value); modal.close('Close click');">Save</button>
+    <button type="button" class="btn btn-primary" (click)="buildActor(actorName.value, roll.value, hp.value, multiples.value, entente.value, ''); modal.close('Close click');">Save</button>
     <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cancel</button>
   </div>
 </ng-template>
@@ -79,15 +79,26 @@
                     </i></h4>
                   </div>
                 </div>
-                <h4 *ngIf="actor.entente === 'Friendly'"><i class="fas fa-fist-raised">
-                  {{actor.entente}}
-                </i></h4>
-                <h4 *ngIf="actor.entente === 'Enemy'"><i class="fas fa-dragon">
-                  {{actor.entente}}
-                </i></h4>
-                <h4 *ngIf="actor.entente !== 'Enemy' && actor.entente !== 'Friendly'"><i class="fas fa-scroll">
-                  {{actor.entente}}
-                </i></h4>
+                <div class="row">
+                  <div class="col-md-8">
+                    <h4 *ngIf="actor.entente === 'Friendly'"><i class="fas fa-fist-raised">
+                      {{actor.entente}}
+                    </i></h4>
+                    <h4 *ngIf="actor.entente === 'Enemy'"><i class="fas fa-dragon">
+                      {{actor.entente}}
+                    </i></h4>
+                    <h4 *ngIf="actor.entente !== 'Enemy' && actor.entente !== 'Friendly'"><i class="fas fa-scroll">
+                      {{actor.entente}}
+                    </i></h4>
+                  </div>
+                  <div class="col-md-4">
+                    <h4>
+                      <button type="button" class="btn btn-outline-secondary" (click)="removeInit(actor.id); $event.stopPropagation();">
+                        <i class="fas fa-minus-circle"></i>
+                      </button>
+                    </h4>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
