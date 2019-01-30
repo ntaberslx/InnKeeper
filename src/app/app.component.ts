@@ -35,22 +35,22 @@ export class AppComponent implements OnInit {
       console.log('dunno');
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['shift+right', 'n'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['right', 'n'], (event: KeyboardEvent): boolean => {
       this.next();
       console.log('next init');
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['shift+left', 'p'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['left', 'p'], (event: KeyboardEvent): boolean => {
       this.previous();
       console.log('previous init');
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['shift+up', 'space'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['up', 'space'], (event: KeyboardEvent): boolean => {
       console.log('new init');
       this.addActorModal(this.modalTemplate);
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['shift+down', 'd'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['down', 'd'], (event: KeyboardEvent): boolean => {
       console.log('dealing damage');
       return false;
     }));
@@ -160,7 +160,6 @@ export class AppComponent implements OnInit {
     const data = JSON.stringify({
       'actorArray' : JSON.stringify(this.actorArray)
     });
-    console.log('data' + data);
     localStorage.setItem('InnKeepersBrew', data);
   }
 

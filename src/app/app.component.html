@@ -45,9 +45,34 @@
     <div class="row">
 
       <div class="col-md-4">
-        <h2 class="text-center">Initiative Order
-          <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(newInit)">Add Actor</button>
-        </h2>
+        <div class="row">
+          <div class="col-md-12">
+            <h2 class="text-center">
+              Initiative Order
+            </h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-2"></div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="previous()">
+              <i class="fas fa-arrow-circle-left"></i>
+            </button>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(newInit)">
+              <i class="fas fa-plus-circle"></i>
+            </button>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="next()">
+              <i class="fas fa-arrow-circle-right"></i>
+            </button>
+          </div>
+          <div class="col-md-2"></div>
+        </div>
+
+
 
         <div class="panel panel-primary pre-scrollable">
           <div class="statBloc" *ngFor="let actor of actorArray; let i = index;" (click)="editActorModal(actor)">
