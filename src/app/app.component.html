@@ -1,0 +1,96 @@
+<div class="jumbotron theme text-center">
+  <h1 class="text-white">
+    {{ title }}
+  </h1>
+</div>
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">New Initiative Actor</h4>
+    <!--<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>-->
+  </div>
+  <form>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-6">
+          <input class="form-control" placeholder="Actor Name" #actorName ngModel>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" placeholder="Roll or Modifier" #roll ngModel>
+        </div>
+      </div>
+      <div class="row padded-small">
+        <div class="col-md-6">
+          <input class="form-control" placeholder="Current HP" #hp ngModel>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" placeholder="Entente" #entente ngModel >
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close('Close click')">Save</button>
+    <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cancel</button>
+  </div>
+</ng-template>
+
+
+<div class="section">
+  <div class="container padded">
+    <div class="row">
+
+      <div class="col-md-4">
+        <h2 class="text-center">Initiative Order
+          <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActor(content)">Add Actor</button></h2>
+
+        <div class="panel panel-primary pre-scrollable">
+          <div class="statBloc" *ngFor="let player of actorArray; let i = index;">
+            <div class="card statBloc"  id="actor{{i}}">
+              <div class="panel-heading">
+                <h3 class="panel-title">
+                  {{player.name}}
+                </h3>
+              </div>
+              <div class="panel-body">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="statBloc" *ngFor="let player of friendlyArray; let i = index;">
+              <div class="card statBloc"  id="friendly{{i}}">
+                <div class="panel-heading">
+                  <h3 class="panel-title">
+                    {{player.name}}
+                  </h3>
+                </div>
+                <div class="panel-body">
+                </div>
+              </div>
+          </div>
+          <div class="col-md-6">
+            <div class="statBloc" *ngFor="let player of enemyArray; let i = index;">
+              <div class="card statBloc"  id="enemy{{i}}">
+                <div class="panel-heading">
+                  <h3 class="panel-title">
+                    {{player.name}}
+                  </h3>
+                </div>
+                <div class="panel-body">
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

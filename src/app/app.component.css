@@ -1,0 +1,17 @@
+.center{
+  text-align: center;
+}
+.padded{
+  padding-top: 2rem;
+}
+.padded-small {
+  padding-top: 0.5rem;
+}
+.statBloc {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.5rem;
+}
+.theme{
+  background-color: darkolivegreen;
+}
