@@ -46,21 +46,48 @@
 
       <div class="col-md-4">
         <h2 class="text-center">Initiative Order
-          <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(content)">Add Actor</button></h2>
+          <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(newInit)">Add Actor</button>
+        </h2>
 
         <div class="panel panel-primary pre-scrollable">
-          <div class="statBloc" *ngFor="let actor of actorArray; let i = index;">
-            <div class="card statBloc"  id="actor{{i}}">
+          <div class="statBloc" *ngFor="let actor of actorArray; let i = index;" (click)="editActorModal(actor)">
+            <div class="card statBloc"  id="actor{{i}}" [ngStyle]="getColor(i)">
               <div class="panel-heading">
-                <h3 class="panel-title">
-                  {{actor.name}}
-                </h3>
+                <div class="row">
+                  <div class="col-md-8">
+                    <h3 class="panel-title">
+                      {{actor.name}}
+                    </h3>
+                  </div>
+                  <div class="col-md-4">
+                    <h4 class=""><i class="fas fa-dice-d20">
+                      {{actor.roll}}
+                    </i></h4>
+                  </div>
+                </div>
               </div>
               <div class="panel-body">
-                {{actor.roll}}
-                {{actor.hp}}
-                {{actor.size}}
-                {{actor.entente}}
+                <div class="row">
+                  <div class="col-md-8">
+                    <h4><i class="fas fa-users">
+                      {{actor.size}}
+                    </i></h4>
+                  </div>
+                  <div class="col-md-4">
+                    <h4><i class="fas fa-heart">
+                      {{actor.hp}}
+                    </i></h4>
+                  </div>
+                </div>
+                <h4 *ngIf="actor.entente === 'Friendly'"><i class="fas fa-fist-raised">
+                  {{actor.entente}}
+                </i></h4>
+                <h4 *ngIf="actor.entente === 'Enemy'"><i class="fas fa-dragon">
+                  {{actor.entente}}
+                </i></h4>
+                <h4 *ngIf="actor.entente !== 'Enemy' && actor.entente !== 'Friendly'"><i class="fas fa-scroll">
+                  {{actor.entente}}
+                </i></h4>
               </div>
             </div>
           </div>

@@ -60,8 +60,8 @@ export class AppComponent implements OnInit {
     this.actorArray.push(new Actor(
       name,
       this.getRoll(rollOrMod),
-      +hp,
-      +size,
+      hp === '' ? 0 : +hp,
+      size === '' ? 1 : +size,
       entente
     ));
     this.actorArray.sort(this.sortByInit);
@@ -69,6 +69,10 @@ export class AppComponent implements OnInit {
 
   addActorModal(content): void {
     this.modalService.open(content, { centered: true });
+  }
+
+  editActorModal(actor) {
+    console.log(actor);
   }
 
   getRoll(rollOrMod: string): number {
@@ -100,5 +104,15 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.actorArray = [];
     this.trashBin = [];
+  }
+
+  getColor(i) {
+    const startingRed = '0';
+    const startingGreen = '189';
+    const startingBlue = '45';
+    console.log(i);
+    return {
+      'background-color' : 'rgb(' + startingRed + ',' + startingGreen + ',' + startingBlue + ')'
+    };
   }
 }
