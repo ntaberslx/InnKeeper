@@ -52,6 +52,9 @@ export class AppComponent implements OnInit {
   }
 
   @ViewChild('newInit') modalTemplate: ElementRef;
+  private colorScheme = [
+    'FF6542', '564154', '88498F', '779FA1', 'E0CBA8'
+  ];
   public actorArray;
   // public actorEntenteArray;
   public trashBin;
@@ -107,12 +110,14 @@ export class AppComponent implements OnInit {
   }
 
   getColor(i) {
-    const startingRed = '0';
-    const startingGreen = '189';
-    const startingBlue = '45';
-    console.log(i);
-    return {
-      'background-color' : 'rgb(' + startingRed + ',' + startingGreen + ',' + startingBlue + ')'
-    };
+    if (i >= this.colorScheme.length) {
+      return {
+        'background-color' : '#' + this.colorScheme[this.colorScheme.length - 1]
+      };
+    } else {
+      return {
+        'background-color': '#' + this.colorScheme[i]
+      };
+    }
   }
 }
