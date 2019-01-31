@@ -82,7 +82,6 @@ export class AppComponent implements OnInit {
   }
 
   static getRoll(rollOrMod: string): number {
-    console.log(rollOrMod);
     if (rollOrMod === '') {
       return AppComponent.d20();
     } else if (rollOrMod.indexOf('+') !== -1 || rollOrMod.indexOf('-') !== -1) {
@@ -100,14 +99,14 @@ export class AppComponent implements OnInit {
       a.roll = AppComponent.getRoll(rollOrMod);
       a.hp = hp;
       a.size = size;
-      a.entente = entente;
+      a.entente = entente === '' ? 'Unaligned' : entente;
     } else {
       a = new Actor(
         name,
         AppComponent.getRoll(rollOrMod),
         hp === '' ? 0 : +hp,
         size === '' ? 1 : +size,
-        entente
+        entente === '' ? 'Unaligned' : entente
       );
       this.sortIntoInit(a);
     }
@@ -138,20 +137,26 @@ export class AppComponent implements OnInit {
   }
 
   sortIntoInit(a: Actor) {
-    let index: number;
-    for (const actor of this.actorArray) {
-      if (a.roll <= actor.roll &&
-          (this.actorArray[this.actorArray.indexOf(actor) + 1] &&
-          a.roll > this.actorArray[this.actorArray.indexOf(actor) + 1].roll)) {
-        if (!index) {
-          index = this.actorArray.indexOf(actor) + 1;
+    let index = -1;
+    for (let i = 0; i < this.actorArray.length; i++) {
+      if (index === -1) {
+        if (i === 0) {
+          if (a.roll > this.actorArray[i].roll) {
+            index = i;
+          }
+        } else if (i === this.actorArray.length) {
+          index = i;
+        } else if (this.actorArray[i - 1].roll >= a.roll && a.roll >= this.actorArray[i].roll) {
+          index = i - 1;
         }
       }
     }
-    if (index) {
-      this.actorArray.splice( index, 0, a );
-    } else {
+    if (index === -1) {
+      this.actorArray.unshift(a);
+    } else if (index === this.actorArray.length) {
       this.actorArray.push(a);
+    } else {
+      this.actorArray.splice( index, 0, a );
     }
   }
 
