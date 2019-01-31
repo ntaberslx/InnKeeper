@@ -137,26 +137,21 @@ export class AppComponent implements OnInit {
   }
 
   sortIntoInit(a: Actor) {
-    let index = -1;
-    for (let i = 0; i < this.actorArray.length; i++) {
-      if (index === -1) {
-        if (i === 0) {
-          if (a.roll > this.actorArray[i].roll) {
-            index = i;
-          }
-        } else if (i === this.actorArray.length) {
-          index = i;
-        } else if (this.actorArray[i - 1].roll >= a.roll && a.roll >= this.actorArray[i].roll) {
-          index = i - 1;
+    for (let i = this.actorArray.length - 1; i >= 0; i--) {
+      const check = this.actorArray[i];
+      const prev = this.actorArray[i + 1 === this.actorArray.length ? 0 : i + 1];
+      if (i === 0) {
+        if (check.roll <= a.roll) {
+          this.actorArray.unshift(a);
+          break;
+        } else {
+          this.actorArray.splice( i + 1, 0, a );
+          break;
         }
+      } else if (check.roll >= a.roll && prev.roll < a.roll) {
+        this.actorArray.splice( i + 1, 0, a );
+        break;
       }
-    }
-    if (index === -1) {
-      this.actorArray.unshift(a);
-    } else if (index === this.actorArray.length) {
-      this.actorArray.push(a);
-    } else {
-      this.actorArray.splice( index, 0, a );
     }
   }
 
