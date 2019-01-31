@@ -28,127 +28,131 @@ class Actor {
 })
 
 export class AppComponent implements OnInit {
-  title = 'Your Friendly Local Inn(itiative) Keeper';
   constructor(private _hotkeysService: HotkeysService, private modalService: NgbModal) {
 
-    this._hotkeysService.add(new Hotkey('?', (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey('?', (/*event: KeyboardEvent*/): boolean => {
       console.log('dunno');
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['right', 'n'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['right', 'd'], (/*event: KeyboardEvent*/): boolean => {
       this.next();
       console.log('next init');
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['left', 'p'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['left', 'a'], (/*event: KeyboardEvent*/): boolean => {
       this.previous();
       console.log('previous init');
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['up', 'space'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['up', 'space', 'w'], (/*event: KeyboardEvent*/): boolean => {
       console.log('new init');
       this.addActorModal(this.modalTemplate);
       return false;
     }));
-    this._hotkeysService.add(new Hotkey(['down', 'd'], (event: KeyboardEvent): boolean => {
+    this._hotkeysService.add(new Hotkey(['down', 's'], (/*event: KeyboardEvent*/): boolean => {
       console.log('dealing damage');
       return false;
     }));
   }
+  title = 'Your Friendly Local Inn(itiative) Keeper';
 
-  @ViewChild('newInit') modalTemplate: ElementRef;
+  @ViewChild('initModal') modalTemplate: ElementRef;
   private colorScheme = [
-    'FF6542', '88498F', '4281A4', '62B6CB', '779FA1', 'E0CBA8'
+    '#FF6542', '#88498F', '#4281A4', '#62B6CB', '#779FA1', '#E0CBA8'
   ];
   public actorArray;
   public actorMap;
   public round: number;
+  public modalContent: Actor;
 
-  buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string, id: string): void {
-    let a;
-    if (id === '') {
-      a = new Actor(
-        name,
-        this.getRoll(rollOrMod),
-        hp === '' ? 0 : +hp,
-        size === '' ? 1 : +size,
-        entente
-      );
-    } else {
-      a = this.actorMap.get(id);
-      if (a) {
-        a.name = name;
-        a.roll = this.getRoll(rollOrMod);
-        a.hp = hp;
-        a.size = size;
-        a.entente = entente;
-      } else {
-        a = new Actor(
-          name,
-          this.getRoll(rollOrMod),
-          hp === '' ? 0 : +hp,
-          size === '' ? 1 : +size,
-          entente
-        );
-      }
-    }
-
-    this.actorMap.set(a.id, a);
-    this.sortIntoInit(a);
-    this.save();
+  static sortNewEncounter(actorA, actorB) {
+    return actorB.roll - actorA.roll;
   }
 
-  addActorModal(content): void {
-    this.modalService.open(content, { centered: true });
+  static getRngInteger(min, max): number {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
   }
 
-  editActorModal(actor) {
-    console.log(actor);
+  static d20(): number {
+    return AppComponent.getRngInteger(1, 20);
   }
 
-  getRoll(rollOrMod: string): number {
+  static d20plus(modifier: number): number {
+    return AppComponent.d20() + modifier;
+  }
+
+  static getRoll(rollOrMod: string): number {
     console.log(rollOrMod);
     if (rollOrMod === '') {
-      return this.d20();
+      return AppComponent.d20();
     } else if (rollOrMod.indexOf('+') !== -1 || rollOrMod.indexOf('-') !== -1) {
-      return this.d20plus(+rollOrMod.substr(1, rollOrMod.length));
+      return AppComponent.d20plus(+rollOrMod.substr(1, rollOrMod.length));
     } else {
       return +rollOrMod;
     }
   }
 
-  resetEncounter() {
-    this.actorArray.sort(this.sortNewEncounter);
-    this.round = 1;
-    this.actorArray[this.actorArray.length - 1].name = 'Round 1 Ends';
+  buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string, id: number): void {
+    let a;
+    a = this.actorMap.get(id);
+    if (a) {
+      a.name = name;
+      a.roll = AppComponent.getRoll(rollOrMod);
+      a.hp = hp;
+      a.size = size;
+      a.entente = entente;
+    } else {
+      a = new Actor(
+        name,
+        AppComponent.getRoll(rollOrMod),
+        hp === '' ? 0 : +hp,
+        size === '' ? 1 : +size,
+        entente
+      );
+      this.sortIntoInit(a);
+    }
+
+    this.actorMap.set(a.id, a);
+    this.save();
   }
 
-  sortNewEncounter(actorA, actorB) {
-    return actorB.roll - actorA.roll;
+  addActorModal(content): void {
+    this.modalContent = new Actor(
+      null,
+      null,
+      null,
+      null,
+      null);
+    this.modalService.open(content, { centered: true });
+  }
+
+  editActorModal(content, actor) {
+    this.modalContent = actor;
+    this.modalService.open(content, { centered: true });
+  }
+
+  resetEncounter() {
+    this.actorArray.sort(AppComponent.sortNewEncounter);
+    this.round = 1;
+    this.actorArray[this.actorArray.length - 1].name = 'Round 1 Ends';
   }
 
   sortIntoInit(a: Actor) {
     let index: number;
     for (const actor of this.actorArray) {
-      if (a.roll < actor.roll) {
+      if (a.roll <= actor.roll &&
+          (this.actorArray[this.actorArray.indexOf(actor) + 1] &&
+          a.roll > this.actorArray[this.actorArray.indexOf(actor) + 1].roll)) {
         if (!index) {
           index = this.actorArray.indexOf(actor) + 1;
         }
       }
     }
-    this.actorArray.splice( index, 0, a );
-  }
-
-  d20plus(modifier: number): number {
-    return this.d20() + modifier;
-  }
-
-  d20(): number {
-    return this.getRngInteger(1, 20);
-  }
-
-  getRngInteger(min, max): number {
-    return Math.floor(Math.random() * (max - min + 1) ) + min;
+    if (index) {
+      this.actorArray.splice( index, 0, a );
+    } else {
+      this.actorArray.push(a);
+    }
   }
 
   previous(): void {
@@ -179,11 +183,11 @@ export class AppComponent implements OnInit {
   getColor(i) {
     if (i >= this.colorScheme.length) {
       return {
-        'background-color' : '#' + this.colorScheme[this.colorScheme.length - 1]
+        'background-color' : this.colorScheme[this.colorScheme.length - 1]
       };
     } else {
       return {
-        'background-color': '#' + this.colorScheme[i]
+        'background-color': this.colorScheme[i]
       };
     }
   }

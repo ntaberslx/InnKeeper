@@ -4,37 +4,42 @@
   </h1>
 </div>
 
-<ng-template #newInit let-modal>
+<ng-template #initModal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title">New Initiative Actor</h4>
+    <h4 class="modal-title" *ngIf="!actorMap.get(modalContent.id)">
+      New Initiative Actor
+    </h4>
+    <h4 class="modal-title" *ngIf="actorMap.get(modalContent.id)">
+      Edit {{modalContent.name}}
+    </h4>
   </div>
   <form>
     <div class="modal-body">
       <div class="row">
         <div class="col-md-6">
-          <input class="form-control" placeholder="Actor Name" #actorName ngModel="actorName">
+          <input class="form-control" value="{{modalContent.name}}" placeholder="Actor Name" #actorName ngModel="actorName">
         </div>
         <div class="col-md-6">
-          <input class="form-control" placeholder="Roll or Modifier" #roll ngModel="roll">
+          <input class="form-control" value="{{modalContent.roll}}" placeholder="Roll or Modifier" #roll ngModel="roll">
         </div>
       </div>
       <div class="row padded-small">
         <div class="col-md-6">
-          <input class="form-control" placeholder="Current HP" #hp ngModel="hp">
+          <input class="form-control" value="{{modalContent.hp}}" placeholder="Current HP" #hp ngModel="hp">
         </div>
         <div class="col-md-6">
-          <input class="form-control" placeholder="Group Size (if applicable)" #multiples ngModel="multiples">
+          <input class="form-control" value="{{modalContent.size}}" placeholder="Group Size (if applicable)" #multiples ngModel="multiples">
         </div>
       </div>
       <div class="row padded-small">
         <div class="col-md-12">
-          <input class="form-control" placeholder="Entente" #entente ngModel="entente">
+          <input class="form-control" value="{{modalContent.entente}}" placeholder="Entente" #entente ngModel="entente">
         </div>
       </div>
     </div>
   </form>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="buildActor(actorName.value, roll.value, hp.value, multiples.value, entente.value, ''); modal.close('Close click');">Save</button>
+    <button type="button" class="btn btn-primary" (click)="buildActor(actorName.value, roll.value, hp.value, multiples.value, entente.value, modalContent.id); modal.close('Close click');">Save</button>
     <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cancel</button>
   </div>
 </ng-template>
@@ -60,7 +65,7 @@
             </button>
           </div>
           <div class="col-md-2">
-            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(newInit)">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(initModal)">
               <i class="fas fa-plus-circle"></i>
             </button>
           </div>
@@ -73,7 +78,7 @@
         </div>
 
         <div class="panel panel-primary pre-scrollable">
-          <div class="statBloc" *ngFor="let actor of actorArray; let i = index;" (click)="editActorModal(actor)">
+          <div class="statBloc" *ngFor="let actor of actorArray; let i = index;" (click)="editActorModal(initModal, actor)">
             <div class="card statBloc"  id="actor{{i}}" [ngStyle]="getColor(i)" *ngIf="actor.id !== -1">
               <div class="panel-heading">
                 <div class="row">
@@ -125,13 +130,13 @@
               </div>
             </div>
 
-            <div class="roundEnd" id="round" *ngIf="actor.id === -1">
+            <div class="roundEnd" id="round" *ngIf="actor.id === -1" (click)="$event.stopPropagation();">
               <div class="panel-heading">
                 <div class="row">
                   <div class="col-md-12 text-center strike">
                     <span>
                       <h4 class="panel-title">
-                        <i class="far fa-clock">
+                        <i class="far fa-clock unselectable">
                           {{actor.name}}
                         </i>
                       </h4>
