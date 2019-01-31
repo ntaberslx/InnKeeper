@@ -72,11 +72,9 @@
           <div class="col-md-2"></div>
         </div>
 
-
-
         <div class="panel panel-primary pre-scrollable">
           <div class="statBloc" *ngFor="let actor of actorArray; let i = index;" (click)="editActorModal(actor)">
-            <div class="card statBloc"  id="actor{{i}}" [ngStyle]="getColor(i)">
+            <div class="card statBloc"  id="actor{{i}}" [ngStyle]="getColor(i)" *ngIf="actor.id !== -1">
               <div class="panel-heading">
                 <div class="row">
                   <div class="col-md-8">
@@ -126,27 +124,40 @@
                 </div>
               </div>
             </div>
+
+            <div class="roundEnd" id="round" *ngIf="actor.id === -1">
+              <div class="panel-heading">
+                <div class="row">
+                  <div class="col-md-12 text-center strike">
+                    <span>
+                      <h4 class="panel-title">
+                        <i class="far fa-clock">
+                          {{actor.name}}
+                        </i>
+                      </h4>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
 
-      <!--<div class="col-md-8">
+      <div class="col-md-8">
         <div class="row">
-          <div class="col-md-6">
-            <div class="statBloc" *ngFor="let player of friendlyArray; let i = index;">
-              <div class="card statBloc"  id="friendly{{i}}">
-                <div class="panel-heading">
-                  <h3 class="panel-title">
-                    {{player.name}}
-                  </h3>
-                </div>
-                <div class="panel-body">
-                </div>
-              </div>
+          <div class="col-md-12">
+            <h2 class="text-center">
+              Encounter Manager
+            </h2>
           </div>
+          <button class="btn btn-outline-secondary" (click)="resetEncounter()">New Encounter</button>
+
+          Round: {{round}}
+          Elapsed Time: {{(round - 1) * 6}} seconds
         </div>
-      </div>-->
+      </div>
 
     </div>
   </div>

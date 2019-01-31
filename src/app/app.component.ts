@@ -62,7 +62,7 @@ export class AppComponent implements OnInit {
   ];
   public actorArray;
   public actorMap;
-  // public actorEntenteArray;
+  public round: number;
 
   buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string, id: string): void {
     let a;
@@ -76,16 +76,25 @@ export class AppComponent implements OnInit {
       );
     } else {
       a = this.actorMap.get(id);
-      a.name = name;
-      a.roll = this.getRoll(rollOrMod);
-      a.hp = hp;
-      a.size = size;
-      a.entente = entente;
+      if (a) {
+        a.name = name;
+        a.roll = this.getRoll(rollOrMod);
+        a.hp = hp;
+        a.size = size;
+        a.entente = entente;
+      } else {
+        a = new Actor(
+          name,
+          this.getRoll(rollOrMod),
+          hp === '' ? 0 : +hp,
+          size === '' ? 1 : +size,
+          entente
+        );
+      }
     }
 
     this.actorMap.set(a.id, a);
-    this.actorArray.push(a);
-    this.actorArray.sort(this.sortByInit);
+    this.sortIntoInit(a);
     this.save();
   }
 
@@ -98,6 +107,7 @@ export class AppComponent implements OnInit {
   }
 
   getRoll(rollOrMod: string): number {
+    console.log(rollOrMod);
     if (rollOrMod === '') {
       return this.d20();
     } else if (rollOrMod.indexOf('+') !== -1 || rollOrMod.indexOf('-') !== -1) {
@@ -107,8 +117,26 @@ export class AppComponent implements OnInit {
     }
   }
 
-  sortByInit(actorA, actorB) {
+  resetEncounter() {
+    this.actorArray.sort(this.sortNewEncounter);
+    this.round = 1;
+    this.actorArray[this.actorArray.length - 1].name = 'Round 1 Ends';
+  }
+
+  sortNewEncounter(actorA, actorB) {
     return actorB.roll - actorA.roll;
+  }
+
+  sortIntoInit(a: Actor) {
+    let index: number;
+    for (const actor of this.actorArray) {
+      if (a.roll < actor.roll) {
+        if (!index) {
+          index = this.actorArray.indexOf(actor) + 1;
+        }
+      }
+    }
+    this.actorArray.splice( index, 0, a );
   }
 
   d20plus(modifier: number): number {
@@ -130,6 +158,10 @@ export class AppComponent implements OnInit {
 
   next(): void {
     const a = this.actorArray.shift();
+    if (a.id === -1) {
+      this.round ++;
+      a.name = 'Round ' + this.round + ' Ends';
+    }
     this.actorArray.push(a);
   }
 
@@ -156,6 +188,18 @@ export class AppComponent implements OnInit {
     }
   }
 
+  getRoundEnd() {
+    const a = new Actor(
+      'Round ' + this.round + ' Ends',
+      0,
+      null,
+      null,
+      null
+    );
+    a.id = -1;
+    return a;
+  }
+
   save() {
     const data = JSON.stringify({
       'actorArray' : JSON.stringify(this.actorArray)
@@ -172,6 +216,17 @@ export class AppComponent implements OnInit {
       if (this.actorArray) {
         for (const actor of this.actorArray) {
           this.actorMap.set(actor.id, actor);
+        }
+      }
+    }
+    if (this.actorArray.length === 0) {
+      this.round = 1;
+      this.actorArray.push(this.getRoundEnd());
+      console.log(this.actorArray);
+    } else {
+      for (const actor of this.actorArray) {
+        if (actor.id === -1) {
+          this.round = <number> actor.name.substr(6, 1);
         }
       }
     }
