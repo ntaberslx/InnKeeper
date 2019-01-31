@@ -29,28 +29,27 @@ class Actor {
 
 export class AppComponent implements OnInit {
   constructor(private _hotkeysService: HotkeysService, private modalService: NgbModal) {
-
     this._hotkeysService.add(new Hotkey('?', (/*event: KeyboardEvent*/): boolean => {
       console.log('dunno');
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['right', 'd'], (/*event: KeyboardEvent*/): boolean => {
       this.next();
-      console.log('next init');
+      console.log('next');
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['left', 'a'], (/*event: KeyboardEvent*/): boolean => {
       this.previous();
-      console.log('previous init');
+      console.log('previous');
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['up', 'space', 'w'], (/*event: KeyboardEvent*/): boolean => {
-      console.log('new init');
+      console.log('new');
       this.addActorModal(this.modalTemplate);
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['down', 's'], (/*event: KeyboardEvent*/): boolean => {
-      console.log('dealing damage');
+      console.log('damage');
       return false;
     }));
   }
@@ -64,6 +63,7 @@ export class AppComponent implements OnInit {
   public actorMap;
   public round: number;
   public modalContent: Actor;
+  public ententes: string[];
 
   static sortNewEncounter(actorA, actorB) {
     return actorB.roll - actorA.roll;
@@ -111,7 +111,7 @@ export class AppComponent implements OnInit {
       );
       this.sortIntoInit(a);
     }
-
+    this.makeEntentes();
     this.actorMap.set(a.id, a);
     this.save();
   }
@@ -172,12 +172,22 @@ export class AppComponent implements OnInit {
   removeInit(id: number) {
     for (const actor of this.actorArray) {
       if (id === actor.id) {
-        this.actorArray = this.actorArray.filter(function(ele) {
+        this.actorArray = this.actorArray.filter(function (ele) {
           return ele.id !== id;
         });
       }
     }
+    this.makeEntentes();
     this.save();
+  }
+
+  makeEntentes() {
+    this.ententes.length = 0;
+    for (const actor of this.actorArray) {
+      if (actor.id !== -1 && !this.ententes.includes(actor.entente)) {
+        this.ententes.push(actor.entente);
+      }
+    }
   }
 
   getColor(i) {
@@ -206,7 +216,8 @@ export class AppComponent implements OnInit {
 
   save() {
     const data = JSON.stringify({
-      'actorArray' : JSON.stringify(this.actorArray)
+      actorArray : JSON.stringify(this.actorArray),
+      ententes: JSON.stringify(this.ententes)
     });
     localStorage.setItem('InnKeepersBrew', data);
   }
@@ -214,6 +225,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.actorMap = new Map();
     this.actorArray = [];
+    this.ententes = [];
     const storage = JSON.parse(localStorage.getItem('InnKeepersBrew'));
     if (storage !== '' && storage) {
       this.actorArray = <[]> JSON.parse(storage.actorArray);
@@ -222,6 +234,7 @@ export class AppComponent implements OnInit {
           this.actorMap.set(actor.id, actor);
         }
       }
+      this.ententes = <string[]> JSON.parse(storage.ententes);
     }
     if (this.actorArray.length === 0) {
       this.round = 1;
