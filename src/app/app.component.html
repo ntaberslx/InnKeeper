@@ -207,17 +207,19 @@
                       <div class="card statBloc"  id="{{entente}}{{i}}" [ngStyle]="getColor(i)" >
                         <div class="panel-body">
                           <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-7">
                               <h3 class="panel-title">
                                 {{actor.name}}
                               </h3>
                             </div>
-                            <h4 *ngIf="actor.hp > 0"><i class="fas fa-heartbeat">
-                              {{actor.hp}} / {{actor.maxHP}}
-                            </i></h4>
-                            <h4 *ngIf="actor.hp <= 0"><i class="fas fa-book-dead">
-                              {{actor.hp}} / {{actor.maxHP}}
-                            </i></h4>
+                            <div class="col-md-5">
+                              <h4 *ngIf="actor.hp > 0"><i class="fas fa-heartbeat">
+                                {{actor.hp}} / {{actor.maxHP}}
+                              </i></h4>
+                              <h4 *ngIf="actor.hp <= 0"><i class="fas fa-book-dead">
+                                {{actor.hp}} / {{actor.maxHP}}
+                              </i></h4>
+                            </div>
                           </div>
                           <div class="row">
                             <div class="col-md-2">

@@ -30,7 +30,6 @@ class Actor {
 export class AppComponent implements OnInit {
   constructor(private _hotkeysService: HotkeysService, private modalService: NgbModal) {
     this._hotkeysService.add(new Hotkey('?', (/*event: KeyboardEvent*/): boolean => {
-      console.log('dunno');
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['right', 'd'], (/*event: KeyboardEvent*/): boolean => {
@@ -49,7 +48,6 @@ export class AppComponent implements OnInit {
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['down', 's'], (/*event: KeyboardEvent*/): boolean => {
-      console.log('damage');
       return false;
     }));
   }
@@ -144,7 +142,8 @@ export class AppComponent implements OnInit {
   }
 
   modHP(actor: Actor, mod: number) {
-    actor.hp += mod;
+    actor.hp = (+actor.hp) + mod;
+    this.save();
   }
 
   sortIntoInit(a: Actor) {
