@@ -7,14 +7,14 @@ class Actor {
   public name: string;
   public roll: number;
   public hp: number;
-  public size: number;
+  public maxHP: number;
   public entente: string;
 
-  constructor(name: string, roll: number, hp: number, size: number, entente: string) {
+  constructor(name: string, roll: number, hp: number, maxHP: number, entente: string) {
     this.name = name;
     this.roll = roll;
     this.hp = hp;
-    this.size = size;
+    this.maxHP = maxHP;
     this.entente = entente;
 
     this.id = new Date().getTime();
@@ -91,22 +91,29 @@ export class AppComponent implements OnInit {
     }
   }
 
-  buildActor(name: string, rollOrMod: string, hp: string, size: string, entente: string, id: number): void {
+  buildActor(name: string, rollOrMod: string, hp: string, maxHP: string, entente: string, id: number): void {
     let a;
     a = this.actorMap.get(id);
+    if (entente === 'f' || entente === 'F') {
+      entente = 'Friendly';
+    } else if (entente === 'e' || entente === 'E') {
+      entente = 'Enemy';
+    } else if (entente === '') {
+      entente = 'Unaligned';
+    }
     if (a) {
       a.name = name;
       a.roll = AppComponent.getRoll(rollOrMod);
       a.hp = hp;
-      a.size = size;
+      a.maxHP = maxHP;
       a.entente = entente === '' ? 'Unaligned' : entente;
     } else {
       a = new Actor(
         name,
         AppComponent.getRoll(rollOrMod),
         hp === '' ? 0 : +hp,
-        size === '' ? 1 : +size,
-        entente === '' ? 'Unaligned' : entente
+        maxHP === '' ? 1 : +maxHP,
+        entente
       );
       this.sortIntoInit(a);
     }
@@ -136,6 +143,10 @@ export class AppComponent implements OnInit {
     this.actorArray[this.actorArray.length - 1].name = 'Round 1 Ends';
   }
 
+  modHP(actor: Actor, mod: number) {
+    actor.hp += mod;
+  }
+
   sortIntoInit(a: Actor) {
     for (let i = this.actorArray.length - 1; i >= 0; i--) {
       const check = this.actorArray[i];
@@ -143,14 +154,14 @@ export class AppComponent implements OnInit {
       if (i === 0) {
         if (check.roll <= a.roll) {
           this.actorArray.unshift(a);
-          break;
+          return;
         } else {
           this.actorArray.splice( i + 1, 0, a );
-          break;
+          return;
         }
       } else if (check.roll >= a.roll && prev.roll < a.roll) {
         this.actorArray.splice( i + 1, 0, a );
-        break;
+        return;
       }
     }
   }
@@ -188,6 +199,7 @@ export class AppComponent implements OnInit {
         this.ententes.push(actor.entente);
       }
     }
+    this.ententes.sort();
   }
 
   getColor(i) {
