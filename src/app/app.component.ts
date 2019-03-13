@@ -20,7 +20,7 @@ class Actor {
     this.entente = entente;
     this.mod = mod;
 
-    this.id = new Date().getTime();
+    this.id = new Date().getTime() + Math.floor(Math.random() * Math.floor(999999999));
   }
 }
 
@@ -113,16 +113,23 @@ export class AppComponent implements OnInit {
       if (a.mod !== (rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null)) {
         a.mod = rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null;
       }
-    } else {
-      a = new Actor(
-        name,
-        AppComponent.getRoll(rollOrMod),
-        hp === '' ? 0 : +hp,
-        maxHP === '' ? 1 : +maxHP,
-        entente,
-        rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null
-      );
       this.sortIntoInit(a);
+    } else {
+      let multiplier = +name.substr(name.indexOf(' x ') + 3);
+      if (!multiplier) {
+        multiplier = 1;
+      }
+      for (let i = 0; i < multiplier; i++) {
+        a = new Actor(
+          name.indexOf(' x ') !== -1 ? name.substr(0, name.indexOf(' x ')) + (' ' + (i + 1)) : name,
+          AppComponent.getRoll(rollOrMod),
+          hp === '' ? 0 : +hp,
+          maxHP === '' ? 1 : +maxHP,
+          entente,
+          rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null
+        );
+        this.sortIntoInit(a);
+      }
     }
     this.makeEntentes();
     this.actorMap.set(a.id, a);
