@@ -153,7 +153,7 @@ export class AppComponent implements OnInit {
       }
     }
     this.round = 1;
-    this.actorArray[this.actorArray.length - 1].name = 'Round 1 Ends';
+    this.actorMap.get(-1).name = 'Round 1 Ends';
   }
 
   modHP(actor: Actor, mod: number) {
