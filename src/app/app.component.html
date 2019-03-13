@@ -10,7 +10,7 @@
       New Initiative Actor
     </h4>
     <h4 class="modal-title" *ngIf="actorMap.get(modalContent.id)">
-      Edit {{modalContent.name}}
+      Editing {{modalContent.name}}
     </h4>
   </div>
   <form>
@@ -25,7 +25,7 @@
         <div class="col-md-6">
           <span class="input-group-text">
             <i class="fas fa-dice-d20" style="margin-right: 0.5rem"></i>
-            <input class="form-control" value="{{modalContent.roll}}" placeholder="Roll or Modifier" #roll ngModel="roll">
+            <input class="form-control" value="{{modalContent.mod ? modalContent.mod : modalContent.roll}}" placeholder="Roll or Modifier" #roll ngModel="roll">
           </span>
         </div>
       </div>

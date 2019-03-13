@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef  } from '@angular/core';
 import {Hotkey, HotkeysService} from 'angular2-hotkeys';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {toInteger} from '@ng-bootstrap/ng-bootstrap/util/util';
 
 class Actor {
   public id: number;
@@ -9,13 +10,15 @@ class Actor {
   public hp: number;
   public maxHP: number;
   public entente: string;
+  public mod: string;
 
-  constructor(name: string, roll: number, hp: number, maxHP: number, entente: string) {
+  constructor(name: string, roll: number, hp: number, maxHP: number, entente: string, mod: string) {
     this.name = name;
     this.roll = roll;
     this.hp = hp;
     this.maxHP = maxHP;
     this.entente = entente;
+    this.mod = mod;
 
     this.id = new Date().getTime();
   }
@@ -83,7 +86,7 @@ export class AppComponent implements OnInit {
     if (rollOrMod === '') {
       return AppComponent.d20();
     } else if (rollOrMod.indexOf('+') !== -1 || rollOrMod.indexOf('-') !== -1) {
-      return AppComponent.d20plus(+rollOrMod.substr(1, rollOrMod.length));
+      return AppComponent.d20plus(+rollOrMod);
     } else {
       return +rollOrMod;
     }
@@ -101,17 +104,23 @@ export class AppComponent implements OnInit {
     }
     if (a) {
       a.name = name;
-      a.roll = AppComponent.getRoll(rollOrMod);
+      if (a.mod !== (rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null)) {
+        a.roll = AppComponent.getRoll(rollOrMod);
+      }
       a.hp = hp;
       a.maxHP = maxHP;
       a.entente = entente === '' ? 'Unaligned' : entente;
+      if (a.mod !== (rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null)) {
+        a.mod = rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null;
+      }
     } else {
       a = new Actor(
         name,
         AppComponent.getRoll(rollOrMod),
         hp === '' ? 0 : +hp,
         maxHP === '' ? 1 : +maxHP,
-        entente
+        entente,
+        rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null
       );
       this.sortIntoInit(a);
     }
@@ -122,6 +131,7 @@ export class AppComponent implements OnInit {
 
   addActorModal(content): void {
     this.modalContent = new Actor(
+      null,
       null,
       null,
       null,
@@ -137,6 +147,11 @@ export class AppComponent implements OnInit {
 
   resetEncounter() {
     this.actorArray.sort(AppComponent.sortNewEncounter);
+    for (const actor of this.actorArray) {
+      if (actor.mod) {
+        actor.roll = AppComponent.d20plus(+actor.mod);
+      }
+    }
     this.round = 1;
     this.actorArray[this.actorArray.length - 1].name = 'Round 1 Ends';
   }
@@ -219,7 +234,8 @@ export class AppComponent implements OnInit {
       0,
       null,
       null,
-      null
+      null,
+       null
     );
     a.id = -1;
     return a;
