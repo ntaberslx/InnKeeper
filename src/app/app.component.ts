@@ -102,16 +102,17 @@ export class AppComponent implements OnInit {
     } else if (entente === '') {
       entente = 'Unaligned';
     }
+    const roll = AppComponent.getRoll(rollOrMod);
+    const mod = rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null;
     if (a) {
+      this.removeInit(a.id);
       a.name = name;
-      if (a.mod !== (rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null)) {
-        a.roll = AppComponent.getRoll(rollOrMod);
-      }
+      a.roll = roll;
       a.hp = hp;
       a.maxHP = maxHP;
       a.entente = entente === '' ? 'Unaligned' : entente;
-      if (a.mod !== (rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null)) {
-        a.mod = rollOrMod.indexOf('+') === 0 || rollOrMod.indexOf('-') === 0 ? rollOrMod : null;
+      if (a.mod !== mod) {
+        a.mod = mod;
       }
       this.sortIntoInit(a);
     } else {
@@ -153,12 +154,12 @@ export class AppComponent implements OnInit {
   }
 
   resetEncounter() {
-    this.actorArray.sort(AppComponent.sortNewEncounter);
     for (const actor of this.actorArray) {
       if (actor.mod) {
         actor.roll = AppComponent.d20plus(+actor.mod);
       }
     }
+    this.actorArray.sort(AppComponent.sortNewEncounter);
     this.round = 1;
     this.actorMap.get(-1).name = 'Round 1 Ends';
   }
