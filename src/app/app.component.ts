@@ -191,6 +191,14 @@ export class AppComponent implements OnInit {
   previous(): void {
     const a = this.actorArray.pop();
     this.actorArray.unshift(a);
+    if (this.actorArray[0].id === -1) {
+      this.round--;
+      if (this.round < 0) {
+        this.round = 0;
+      }
+      this.actorArray[0].name = 'Round ' + this.round + ' Ends';
+    }
+    this.save();
   }
 
   next(): void {
@@ -200,6 +208,7 @@ export class AppComponent implements OnInit {
       a.name = 'Round ' + this.round + ' Ends';
     }
     this.actorArray.push(a);
+    this.save();
   }
 
   removeInit(id: number) {

@@ -77,17 +77,17 @@
         <div class="row">
           <div class="col-md-2"></div>
           <div class="col-md-2">
-            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="previous()">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="previous()" title="Previous Initiative (left-arrow)">
               <i class="fas fa-arrow-circle-left"></i>
             </button>
           </div>
           <div class="col-md-2">
-            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(initModal)">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="addActorModal(initModal)" title="Add Actor (space)">
               <i class="fas fa-plus-circle"></i>
             </button>
           </div>
           <div class="col-md-2">
-            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="next()">
+            <button class="btn btn-outline-secondary mb-2 mr-2" (click)="next()" title="Next Initiative (right-arrow)">
               <i class="fas fa-arrow-circle-right"></i>
             </button>
           </div>
@@ -180,7 +180,7 @@
         </div>
         <div class="row border-bottom">
           <div class="col-md-4">
-            <button class="btn btn-outline-secondary" (click)="resetEncounter()">New Encounter</button>
+            <button class="btn btn-outline-secondary" (click)="resetEncounter()" title="re-rolls any actors with mods">New Encounter</button>
           </div>
           <div class="col-md-4">
             <h4>Round: {{round}}</h4>
