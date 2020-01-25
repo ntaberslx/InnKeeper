@@ -13,7 +13,6 @@ h1 {
     width:90%;
     margin:5% auto;
     border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-    padding:1em;
     line-height:1.5em;
     background:hsla(67, 95%, 95%, 1);
 }
@@ -32,7 +31,115 @@ h1 {
 }
 
 .tracker-piece {
-    border:solid 5px hsla(0, 95%, 35%, 1);
+    border:dashed 2px #41403E;
+}
+
+.tracker-piece.front {
+    background:hsla(67, 95%, 95%, 1);
+}
+
+.tracker-piece.front {
+
+}
+
+
+
+.fancy-btn{
+    display:inline-block;
+    position:relative;
+    padding:10px 20px;
+    border:2px solid #ffba47;
+    color: #ffba47;
+    font-family:'Dancing Script',serif;
+    font-style:italic;
+    font-size:30px;
+    text-decoration:none;
+    margin:20px auto;
+    transition: color 0.4s;
+    width:80%;
+    height: 2em;
+}
+.fancy-btn-sm{
+    display:inline-block;
+    position:relative;
+    padding-top:5px;
+    font-family:'Dancing Script',serif;
+    font-style:italic;
+    font-size:20px;
+    text-decoration:none;
+    margin:0;
+    transition: color 0.4s;
+    width:80%;
+    height: 2em;
+}
+.fancy-btn:after{
+    border:2px solid rgba(0,0,0,0);
+    display:inline-block;
+    width:100%;
+    height:100%;
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:auto;
+    transition:all 0.4s;
+    content: attr(data-name);
+}
+.fancy-btn:hover{
+    color: #ff7e00;
+}
+.fancy-btn:hover:after{
+    content: attr(data-new);
+    transition: all 0.4s;
+    border:2px solid #ffba47;
+    width: calc(100% - 10px);
+    height: calc(100% + 10px);
+}
+
+
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+
+
+
+.categories {
+    width:90%;
+    margin:5% auto;
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    padding:0.5em;
+    line-height:1.5em;
+    min-height: 68vh;
+}
+
+.categories{
+    border:solid 2px #502419;
 }
 
 .color1 {
