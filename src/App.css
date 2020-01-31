@@ -1,7 +1,16 @@
+* {
+    font-family:'Dancing Script',serif;
+    font-size:20px;
+}
+
 h1 {
     text-shadow: 2px 2px #2D3047;
     color: #ffffff;
     text-align: center;
+}
+
+h2 {
+    font-size:30px;
 }
 
 .app-body {
@@ -55,7 +64,7 @@ h1 {
     font-size:30px;
     text-decoration:none;
     margin:20px auto;
-    transition: color 0.4s;
+    transition: all 0.4s;
     width:80%;
     height: 2em;
 }
@@ -63,12 +72,8 @@ h1 {
     display:inline-block;
     position:relative;
     padding-top:5px;
-    font-family:'Dancing Script',serif;
-    font-style:italic;
     font-size:20px;
-    text-decoration:none;
     margin:0;
-    transition: color 0.4s;
     width:80%;
     height: 2em;
 }
