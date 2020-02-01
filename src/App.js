@@ -107,6 +107,7 @@ class App extends Component {
         this.state.initiative.forEach((thing)=>{
             round.push(thing.guid);
         });
+        round.sort(this.sortByInitiative);
         this.save(round, 'thisRound');
         this.save([], 'nextRound');
     };
@@ -127,7 +128,7 @@ class App extends Component {
         return _.map(this.state[round], (guid, i) => {
             const thing = this.state.initiative.filter((t)=>{
                 return t.guid === guid;
-            });
+            })[0];
             return (
                 <ReactCardFlip isFlipped={this.isFlipped(thing.guid)} flipDirection="horizontal"
                                flipSpeedBackToFront={0.2} flipSpeedFrontToBack={0.2} key={guid}>
@@ -144,7 +145,7 @@ class App extends Component {
                                 </span>
                             </Col>
                             <Col xs={10}>
-                                {thing.name} {thing.type}
+                                {thing.type} {thing.name}
                             </Col>
                         </Row>
                     </div>
