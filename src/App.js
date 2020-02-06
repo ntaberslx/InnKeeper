@@ -23,8 +23,9 @@ class App extends Component {
                 {name: "fdsa", position: 1, guid: uuid.v4(), type: 'player'},
                 {name: "fdsa", position: 1, guid: uuid.v4(), type: 'npc'},
             ],
-            thisRound : storedData.thisRound ? storedData.thisRound : [],
+            thisRound: storedData.thisRound ? storedData.thisRound : [],
             nextRound: storedData.nextRound ? storedData.nextRound : [],
+            roundCount: storedData.roundCount ? storedData.roundCount : 1,
         };
         if (!(storedData)) {
             saveToLS(this.state);
@@ -41,7 +42,6 @@ class App extends Component {
         this.state.isFlipped = isFlipped;
 
 
-
         this.state.showModal = false;
         this.state.dataModal = {};
         this.state.typeModal = '';
@@ -53,7 +53,7 @@ class App extends Component {
         document.title = "InnKeeper";
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         saveToLS(this.state);
     }
 
@@ -71,45 +71,44 @@ class App extends Component {
     advanceInitiative = () => {
         let thisRound = this.state.thisRound;
         let nextRound = this.state.nextRound;
-        nextRound.push(thisRound.shift());
-        this.save(thisRound, "thisRound");
-        this.save(nextRound, 'nextRound');
+        if (thisRound.length > 0) {
+            nextRound.push(thisRound.shift());
+            this.save(thisRound, "thisRound");
+            this.save(nextRound, 'nextRound');
+        } else {
+            this.save(nextRound, "thisRound");
+            this.save(thisRound, 'nextRound');
+            this.save(this.state.roundCount + 1, 'roundCount');
+        }
     };
 
     declineInitiative = () => {
         let thisRound = this.state.thisRound;
         let nextRound = this.state.nextRound;
-        thisRound.unshift(nextRound.pop());
-        this.save(thisRound, "thisRound");
-        this.save(nextRound, 'nextRound');
+        if (nextRound.length > 0) {
+            thisRound.unshift(nextRound.pop());
+            this.save(thisRound, "thisRound");
+            this.save(nextRound, 'nextRound');
+        } else {
+            this.save(nextRound, "thisRound");
+            this.save(thisRound, 'nextRound');
+            this.save(this.state.roundCount - 1, 'roundCount');
+        }
     };
 
     sortByInitiative = (a, b) => {
         return a.position - b.position;
     };
 
-    addToInitiative = (object, nextRound = true) => {
-        if (nextRound) {
-            let currentState = this.state.nextRound;
-            currentState.push(object);
-            currentState.sort(this.sortByInitiative);
-            this.save(currentState, 'nextRound');
-        } else {
-            let currentState = this.state.initiative;
-            currentState.push(object);
-            currentState.sort(this.sortByInitiative);
-            this.save(currentState, 'initiative');
-        }
-    };
-
     rollInitiative = () => {
         let round = [];
-        this.state.initiative.forEach((thing)=>{
+        this.state.initiative.forEach((thing) => {
             round.push(thing.guid);
         });
         round.sort(this.sortByInitiative);
         this.save(round, 'thisRound');
         this.save([], 'nextRound');
+        this.save(1, 'roundCount');
     };
 
     handleFlip = (e, guid) => {
@@ -126,39 +125,41 @@ class App extends Component {
 
     getInitiative = (round) => {
         return _.map(this.state[round], (guid, i) => {
-            const thing = this.state.initiative.filter((t)=>{
+            const thing = this.state.initiative.filter((t) => {
                 return t.guid === guid;
             })[0];
-            return (
-                <ReactCardFlip isFlipped={this.isFlipped(thing.guid)} flipDirection="horizontal"
-                               flipSpeedBackToFront={0.2} flipSpeedFrontToBack={0.2} key={guid}>
-                    <div className={"tracker-piece front"} onClick={(e) => {
-                        this.handleFlip(e, thing.guid)
-                    }}>
-                        <Row>
-                            <Col xs={1}>
+            if (thing) {
+                return (
+                    <ReactCardFlip isFlipped={this.isFlipped(thing.guid)} flipDirection="horizontal"
+                                   flipSpeedBackToFront={0.2} flipSpeedFrontToBack={0.2} key={guid}>
+                        <div className={"tracker-piece front"} onClick={(e) => {
+                            this.handleFlip(e, thing.guid)
+                        }}>
+                            <Row>
+                                <Col xs={1}>
                                 <span>
                                     <i className="icon" style={{'verticalAlign': 'middle'}}>
                                         <FontAwesomeIcon icon={faDiceD20} size={"2x"} transform={"up-2.5 left-5"}
                                                          color={"#f7be16"}/>
                                     </i>
                                 </span>
-                            </Col>
-                            <Col xs={10}>
-                                {thing.type} {thing.name}
-                            </Col>
-                        </Row>
-                    </div>
+                                </Col>
+                                <Col xs={10}>
+                                    {thing.type} {thing.name}
+                                </Col>
+                            </Row>
+                        </div>
 
-                    <div className={"tracker-piece back"} onClick={(e) => {
-                        this.handleFlip(e, thing.guid)
-                    }}>
-                        <Row>
-                            Back
-                        </Row>
-                    </div>
-                </ReactCardFlip>
-            );
+                        <div className={"tracker-piece back"} onClick={(e) => {
+                            this.handleFlip(e, thing.guid)
+                        }}>
+                            <Row>
+                                Back
+                            </Row>
+                        </div>
+                    </ReactCardFlip>
+                );
+            }
         });
     };
 
@@ -186,7 +187,9 @@ class App extends Component {
         let data = this.state.dataModal;
         data.type = this.state.typeModal;
         data.guid = uuid.v4();
-
+        nextRound.push(data);
+        nextRound.sort(this.sortByInitiative);
+        this.save(nextRound, 'nextRound');
         this.handleCloseModal();
     };
 
@@ -210,7 +213,7 @@ class App extends Component {
                     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
                     crossOrigin="anonymous"/>
 
-                <Jumbotron fluid style={{'paddingBottom':'40px', 'paddingTop':'40px'}}>
+                <Jumbotron fluid style={{'paddingBottom': '40px', 'paddingTop': '40px'}}>
                     <Container className={"scrollwork"}>
                         <h1>Your Friendly Local Inn(itiative) Keeper</h1>
                     </Container>
@@ -229,7 +232,8 @@ class App extends Component {
                                 </button>
                             </Col>
                             <Col sm={4}>
-                                <button className="btn-flip" data-back="Initiative" data-front="Roll" onClick={this.rollInitiative}/>
+                                <button className="btn-flip" data-back="Initiative" data-front="Roll"
+                                        onClick={this.rollInitiative}/>
                             </Col>
                             <Col sm={4} className={'text-center'}
                                  style={{'paddingRight': '0px', 'paddingLeft': '30px'}}>
@@ -253,7 +257,7 @@ class App extends Component {
                                 }}>
                                     <Row>
                                         <Col xs={12}>
-                                            Round Marker
+                                            End of Round {this.state.roundCount}
                                         </Col>
                                     </Row>
                                 </div>
@@ -262,7 +266,7 @@ class App extends Component {
                                     this.handleFlip(e, 1)
                                 }}>
                                     <Row>
-                                        Time Passed
+                                        {(this.state.roundCount - 1) * 6} Seconds Have Elapsed
                                     </Row>
                                 </div>
                             </ReactCardFlip>
@@ -277,7 +281,7 @@ class App extends Component {
                                 <div className={'text-center'}>
                                     <button onClick={(e) => {
                                         this.handleOpenModal('player');
-                                    }} className={"fancy-btn"} data-name={"Player"} data-new={"New Player"}/>
+                                    }} className={"fancy-btn"} data-name={"Players"} data-new={"New Player"}/>
                                 </div>
                                 <div className={"categories"}>
                                     {this.getCategory('player')}
@@ -312,7 +316,7 @@ class App extends Component {
                         <Modal.Title>
                             {
                                 this.state.dataModal.isNew ?
-                                    'New ' + this.state.typeModal.substr(0, 1).toUpperCase() + this.state.typeModal.substr(1) :
+                                    "New " + this.state.typeModal.substr(0, 1).toUpperCase() + this.state.typeModal.substr(1) :
                                     "Edit " + this.state.dataModal.name
                             }
                         </Modal.Title>
@@ -328,7 +332,7 @@ class App extends Component {
                                     </Col>
                                     <Col sm={9}>
                                         <input type={"text"} className={'form-control'}
-                                               value={this.state.dataModal.name} onChange={e => {
+                                               defaultValue={this.state.dataModal.name} onChange={e => {
                                             this.handleModalFieldChange('name', e.target.value);
                                         }}/>
                                     </Col>
@@ -341,7 +345,7 @@ class App extends Component {
                                     </Col>
                                     <Col sm={9}>
                                         <input type={"number"} className={'form-control'}
-                                               value={this.state.dataModal.position} onChange={e => {
+                                               defaultValue={this.state.dataModal.position} onChange={e => {
                                             this.handleModalFieldChange('position', e.target.value);
                                         }}/>
                                     </Col>
@@ -357,7 +361,7 @@ class App extends Component {
                                     </Col>
                                     <Col sm={9}>
                                         <input type={"text"} className={'form-control'}
-                                               value={this.state.dataModal.name} onChange={e => {
+                                               defaultValue={this.state.dataModal.name} onChange={e => {
                                             this.handleModalFieldChange('name', e.target.value);
                                         }}/>
                                     </Col>
@@ -370,7 +374,7 @@ class App extends Component {
                                     </Col>
                                     <Col sm={9}>
                                         <input type={"number"} className={'form-control'}
-                                               value={this.state.dataModal.position} onChange={e => {
+                                               defaultValue={this.state.dataModal.position} onChange={e => {
                                             this.handleModalFieldChange('position', e.target.value);
                                         }}/>
                                     </Col>
@@ -383,7 +387,7 @@ class App extends Component {
                                     </Col>
                                     <Col sm={9}>
                                         <input type={"number"} className={'form-control'}
-                                               value={this.state.dataModal.duration} onChange={e => {
+                                               defaultValue={this.state.dataModal.duration} onChange={e => {
                                             this.handleModalFieldChange('duration', e.target.value);
                                         }}/>
                                     </Col>
