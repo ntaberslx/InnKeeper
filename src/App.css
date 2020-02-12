@@ -225,3 +225,8 @@ h2 {
     content: attr(data-front);
     transform: translateY(0) rotateX(0);
 }
+
+
+.modal-row {
+    padding-top: 15px;
+}

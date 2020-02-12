@@ -6,7 +6,13 @@ import _ from 'lodash';
 import uuid from 'uuid';
 import ReactCardFlip from 'react-card-flip';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowCircleLeft, faArrowCircleRight, faDiceD20} from "@fortawesome/free-solid-svg-icons";
+import {
+    faArrowCircleLeft,
+    faArrowCircleRight,
+    faDiceD20, faFire,
+    faHeart,
+    faMinusCircle
+} from "@fortawesome/free-solid-svg-icons";
 import Button from "react-bootstrap/Button";
 
 /*<a style="background-color:black;color:white;text-decoration:none;padding:4px 6px;font-family:-apple-system, BlinkMacSystemFont, &quot;San Francisco&quot;, &quot;Helvetica Neue&quot;, Helvetica, Ubuntu, Roboto, Noto, &quot;Segoe UI&quot;, Arial, sans-serif;font-size:12px;font-weight:bold;line-height:1.2;display:inline-block;border-radius:3px" href="https://unsplash.com/@mockup_photos?utm_medium=referral&amp;utm_campaign=photographer-credit&amp;utm_content=creditBadge" target="_blank" rel="noopener noreferrer" title="Download free do whatever you want high-resolution photos from Mockup Photos"><span style="display:inline-block;padding:2px 3px"><svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:auto;position:relative;vertical-align:middle;top:-2px;fill:white" viewBox="0 0 32 32"><title>unsplash-logo</title><path d="M10 9V0h12v9H10zm12 5h10v18H0V14h10v9h12v-9z"></path></svg></span><span style="display:inline-block;padding:2px 3px">Mockup Photos</span></a>*/
@@ -47,6 +53,9 @@ class App extends Component {
         this.state.typeModal = '';
 
         this.handleFlip = this.handleFlip.bind(this);
+
+        this.state.message = '';
+        this.state.showMessage = false;
     }
 
     componentDidMount() {
@@ -89,7 +98,7 @@ class App extends Component {
             thisRound.unshift(nextRound.pop());
             this.save(thisRound, "thisRound");
             this.save(nextRound, 'nextRound');
-        } else {
+        } else if (this.state.roundCount > 1) {
             this.save(nextRound, "thisRound");
             this.save(thisRound, 'nextRound');
             this.save(this.state.roundCount - 1, 'roundCount');
@@ -105,7 +114,6 @@ class App extends Component {
         this.state.initiative.forEach((thing) => {
             round.push(thing.guid);
         });
-        round.sort(this.sortByInitiative);
         this.save(round, 'thisRound');
         this.save([], 'nextRound');
         this.save(1, 'roundCount');
@@ -116,6 +124,79 @@ class App extends Component {
         let currentState = this.state.isFlipped;
         currentState[guid] = !currentState[guid];
         this.save(currentState, 'isFlipped');
+    };
+
+    confirmRemoveThingFromRounds = (e, guid) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const message = {
+            copy: 'Are you sure you want to remove this from the round order?',
+            subCopy: 'If you roll initiative again it will add this back',
+            guid
+        };
+        this.save(message, "message");
+        this.save(true, "showMessage")
+    };
+
+    removeThingFromRounds = (e, guid) => {
+        e.preventDefault();
+        e.stopPropagation();
+        let thisRound = this.state.thisRound;
+        let nextRound = this.state.nextRound;
+
+        thisRound = thisRound.filter((thing) => {
+            return thing !== guid;
+        });
+        nextRound = nextRound.filter((thing) => {
+            return thing !== guid;
+        });
+
+        if (thisRound !== this.state.thisRound) {
+            this.save(thisRound, "thisRound");
+        }
+        if (nextRound !== this.state.nextRound) {
+            this.save(nextRound, "nextRound");
+        }
+        let isFlipped = this.state.isFlipped;
+        isFlipped[guid] = false;
+        this.save(isFlipped, "isFlipped");
+    };
+
+
+    /* Modal Control */
+    handleOpenModal = (type, data = {isNew: true}) => {
+        this.setState({showModal: true, typeModal: type, dataModal: data});
+    };
+
+    handleSaveModal = () => {
+        let nextRound = this.state.nextRound;
+        let initiative = this.state.initiative;
+        let data = this.state.dataModal;
+        if (data.name && data.position) {
+            data.type = this.state.typeModal;
+            data.guid = uuid.v4();
+            data.isNew = false;
+            nextRound.push(data.guid);
+            initiative.push(data);
+            initiative.sort(this.sortByInitiative);
+            this.save(initiative, 'initiative');
+            this.save(nextRound, 'nextRound');
+            this.handleCloseModal();
+        }
+    };
+
+    handleCloseModal = () => {
+        this.setState({showModal: false, typeModal: '', dataModal: {}});
+    };
+
+    handleModalFieldChange = (field, payload) => {
+        let data = this.state.dataModal;
+        data[field] = payload;
+        this.save(data, 'dataModal');
+    };
+
+    handleCloseMessage = () => {
+        this.setState({showMessage: false, message: ''});
     };
 
     /* DOM */
@@ -139,13 +220,19 @@ class App extends Component {
                                 <Col xs={1}>
                                 <span>
                                     <i className="icon" style={{'verticalAlign': 'middle'}}>
+                                        {(thing.type === 'npc' || thing.type === 'player') &&
                                         <FontAwesomeIcon icon={faDiceD20} size={"2x"} transform={"up-2.5 left-5"}
                                                          color={"#f7be16"}/>
+                                        }
+                                        {(thing.type === 'effect') &&
+                                        <FontAwesomeIcon icon={faFire} size={"2x"} transform={"up-2.5 left-5"}
+                                                         color={"#f7be16"}/>
+                                        }
                                     </i>
                                 </span>
                                 </Col>
                                 <Col xs={10}>
-                                    {thing.type} {thing.name}
+                                    {thing.name}
                                 </Col>
                             </Row>
                         </div>
@@ -154,7 +241,37 @@ class App extends Component {
                             this.handleFlip(e, thing.guid)
                         }}>
                             <Row>
-                                Back
+                                <Col sm={9}>
+                                    {(thing.currentHealth || thing.totalHealth) && <Row>
+                                        <Col sm={5}>
+                                            Health
+                                        </Col>
+                                        <Col sm={7}>
+                                            {thing.currentHealth} / {thing.totalHealth}
+                                        </Col>
+                                    </Row>}
+                                    <Row>
+                                        <Col>
+                                            Roll
+                                        </Col>
+                                        <Col>
+                                            {thing.position}
+                                        </Col>
+                                    </Row>
+                                    {(thing.type === 'npc' && thing.behavior) && <Row>
+                                        behavior
+                                    </Row>}
+                                    {(thing.type === 'event' && thing.duration) && <Row>
+                                        Remaining Duration
+                                    </Row>}
+                                </Col>
+                                <Col sm={3}>
+                                    <i className="icon" style={{'verticalAlign': 'middle'}}
+                                       onClick={(e) => this.confirmRemoveThingFromRounds(e, thing.guid)}>
+                                        <FontAwesomeIcon icon={faMinusCircle} size={"2x"} transform={"up-2.5 left-5"}
+                                                         color={"#6e2825"}/>
+                                    </i>
+                                </Col>
                             </Row>
                         </div>
                     </ReactCardFlip>
@@ -175,32 +292,6 @@ class App extends Component {
                 </div>
             );
         });
-    };
-
-    /* Modal Control */
-    handleOpenModal = (type, data = {isNew: true}) => {
-        this.setState({showModal: true, typeModal: type, dataModal: data});
-    };
-
-    handleSaveModal = () => {
-        let nextRound = this.state.nextRound;
-        let data = this.state.dataModal;
-        data.type = this.state.typeModal;
-        data.guid = uuid.v4();
-        nextRound.push(data);
-        nextRound.sort(this.sortByInitiative);
-        this.save(nextRound, 'nextRound');
-        this.handleCloseModal();
-    };
-
-    handleCloseModal = () => {
-        this.setState({showModal: false, typeModal: '', dataModal: {}});
-    };
-
-    handleModalFieldChange = (field, payload) => {
-        let data = this.state.dataModal;
-        data[field] = payload;
-        this.save(data, 'dataModal');
     };
 
     render() {
@@ -323,7 +414,7 @@ class App extends Component {
                     </Modal.Header>
                     <Modal.Body>
                         <Container>
-                            {(this.state.typeModal === 'player' || this.state.typeModal === 'npc') && <form>
+                            <form>
                                 <Row>
                                     <Col sm={3}>
                                         <label>
@@ -337,7 +428,7 @@ class App extends Component {
                                         }}/>
                                     </Col>
                                 </Row>
-                                <Row>
+                                <Row className={"modal-row"}>
                                     <Col sm={3}>
                                         <label>
                                             Initiative
@@ -350,36 +441,54 @@ class App extends Component {
                                         }}/>
                                     </Col>
                                 </Row>
-                            </form>}
 
-                            {this.state.typeModal === 'effect' && <form>
-                                <Row>
+                                {(this.state.typeModal === 'player' || this.state.typeModal === 'npc') &&
+                                <Row className={"modal-row"}>
                                     <Col sm={3}>
                                         <label>
-                                            Name
+                                            Health (current/max)
                                         </label>
                                     </Col>
-                                    <Col sm={9}>
-                                        <input type={"text"} className={'form-control'}
-                                               defaultValue={this.state.dataModal.name} onChange={e => {
-                                            this.handleModalFieldChange('name', e.target.value);
-                                        }}/>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col sm={3}>
-                                        <label>
-                                            Initiative
-                                        </label>
-                                    </Col>
-                                    <Col sm={9}>
+                                    <Col sm={4}>
                                         <input type={"number"} className={'form-control'}
-                                               defaultValue={this.state.dataModal.position} onChange={e => {
-                                            this.handleModalFieldChange('position', e.target.value);
+                                               defaultValue={this.state.dataModal.currentHealth} onChange={e => {
+                                                   if (!this.state.dataModal.totalHealth || this.state.dataModal.totalHealth < e.target.value){
+                                                       this.handleModalFieldChange('totalHealth', e.target.value);
+                                                   }
+                                            this.handleModalFieldChange('currentHealth', e.target.value);
                                         }}/>
                                     </Col>
-                                </Row>
-                                <Row>
+                                    <Col sm={1}>
+                                        <i className="icon" style={{'verticalAlign': 'middle', 'horizontalAlign':'middle'}}>
+                                            <FontAwesomeIcon icon={faHeart} size={"2x"}
+                                                             color={"#f7be16"}/>
+                                        </i>
+                                    </Col>
+                                    <Col sm={4}>
+                                        <input type={"number"} className={'form-control'}
+                                               defaultValue={this.state.dataModal.totalHealth} onChange={e => {
+                                            this.handleModalFieldChange('totalHealth', e.target.value);
+                                        }}/>
+                                    </Col>
+                                </Row>}
+
+                                {(this.state.typeModal === 'npc') &&
+                                <Row className={"modal-row"}>
+                                    <Col sm={3}>
+                                        <label>
+                                            Behavior Blurb
+                                        </label>
+                                    </Col>
+                                    <Col sm={9}>
+                                        <textarea className={'form-control'}
+                                                  defaultValue={this.state.dataModal.behavior} onChange={e => {
+                                            this.handleModalFieldChange('behavior', e.target.value);
+                                        }}/>
+                                    </Col>
+                                </Row>}
+
+                                {this.state.typeModal === 'effect' &&
+                                <Row className={"modal-row"}>
                                     <Col sm={3}>
                                         <label>
                                             Duration (Rounds)
@@ -391,8 +500,8 @@ class App extends Component {
                                             this.handleModalFieldChange('duration', e.target.value);
                                         }}/>
                                     </Col>
-                                </Row>
-                            </form>}
+                                </Row>}
+                            </form>
                         </Container>
                     </Modal.Body>
 
@@ -403,9 +512,33 @@ class App extends Component {
                         {this.state.dataModal.isNew && <Button variant="danger" onClick={this.handleCloseModal}>
                             Cancel
                         </Button>}
-                        {this.state.dataModal.isNew && <Button variant="success" onClick={this.handleSaveModal}>
+                        {this.state.dataModal.isNew && this.state.dataModal.name && this.state.dataModal.position &&
+                        <Button variant="success" onClick={this.handleSaveModal}>
                             Save
                         </Button>}
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={this.state.showMessage} onHide={this.handleCloseMessage} size="lg" centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            {this.state.message.copy}
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {this.state.message.subCopy}
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="danger" onClick={this.handleCloseMessage}>
+                            Cancel
+                        </Button>
+                        <Button variant="success" onClick={(e) => {
+                            this.removeThingFromRounds(e, this.state.message.guid);
+                            this.handleCloseMessage();
+                        }}>
+                            Confirm
+                        </Button>
                     </Modal.Footer>
                 </Modal>
             </div>
